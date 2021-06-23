@@ -6,6 +6,10 @@ import { ROUTES } from '../constants/routes';
 import BillsUI from "../views/BillsUI.js"
 import Bills from '../containers/Bills';
 
+const onNavigate = (pathname) => {
+  document.body.innerHTML = ROUTES({ pathname })
+}
+
 describe("Given I am connected as an employee", () => {
   describe('When I am on Bills page but it is loading', () => {
     test('Then, Loading page should be rendered', () => {
@@ -26,35 +30,31 @@ describe("Given I am connected as an employee", () => {
   })
 
   describe("When I am on Bills Page", () => {
+    beforeEach(() => {
+      document.body.innerHTML = BillsUI({ data: bills })
+
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee'
+      }))
+    })
+
     test("Then bills should be ordered from earliest to latest", () => {
-      const html = BillsUI({ data: bills })
-      document.body.innerHTML = html
       const dates = screen.getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
       const antiChrono = (a, b) => ((a < b) ? 1 : -1)
       const datesSorted = [...dates].sort(antiChrono)
 
       expect(dates).toEqual(datesSorted)
     })
-  })
 
-  describe("When I am on Bills Page", () => {
     describe("When I click on the icon eye of a bill", () => {
       test("Then a modal should open", () => {
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-        window.localStorage.setItem('user', JSON.stringify({
-          type: 'Employee'
-        }))
-        const html = BillsUI({ data: [bills[0]] })
-        document.body.innerHTML = html
-        const onNavigate = (pathname) => {
-          document.body.innerHTML = ROUTES({ pathname })
-        }
         const billsContainer = new Bills({
           document, onNavigate, firestore: null, localStorage: window.localStorage
         })
 
         const handleClickIconEye = jest.fn(billsContainer.handleClickIconEye)
-        const eye = screen.getByTestId('icon-eye')
+        const eye = screen.getAllByTestId('icon-eye')[0]
         eye.addEventListener('click', handleClickIconEye(eye))
         userEvent.click(eye)
 
@@ -65,15 +65,6 @@ describe("Given I am connected as an employee", () => {
 
     describe("When I click on the New bill button", () => {
       test("Then I should be redirected to new bill form", () => {
-        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-        window.localStorage.setItem('user', JSON.stringify({
-          type: 'Employee'
-        }))
-        const html = BillsUI({ data: [] })
-        document.body.innerHTML = html
-        const onNavigate = (pathname) => {
-          document.body.innerHTML = ROUTES({ pathname })
-        }
         const billsContainer = new Bills({
           document, onNavigate, firestore: null, localStorage: window.localStorage
         })
