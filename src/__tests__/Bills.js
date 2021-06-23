@@ -1,7 +1,10 @@
 import { screen } from "@testing-library/dom"
-import BillsUI from "../views/BillsUI.js"
+import userEvent from '@testing-library/user-event';
+import { localStorageMock } from '../__mocks__/localStorage';
 import { bills } from "../fixtures/bills.js"
-import DashboardUI from '../views/DashboardUI';
+import { ROUTES } from '../constants/routes';
+import BillsUI from "../views/BillsUI.js"
+import Bills from '../containers/Bills';
 
 describe("Given I am connected as an employee", () => {
   describe('When I am on Bills page but it is loading', () => {
@@ -28,6 +31,31 @@ describe("Given I am connected as an employee", () => {
       const antiChrono = (a, b) => ((a < b) ? 1 : -1)
       const datesSorted = [...dates].sort(antiChrono)
       expect(dates).toEqual(datesSorted)
+    })
+  })
+
+  describe("When I am on Bills Page and I click on the icon eye of a bill", () => {
+    test("A modal should open", () => {
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee'
+      }))
+      const html = BillsUI({ data: [bills[0]] })
+      document.body.innerHTML = html
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+      const billsContainer = new Bills({
+        document, onNavigate, firestore: null, localStorage: window.localStorage
+      })
+
+      const handleClickIconEye = jest.fn(billsContainer.handleClickIconEye)
+      const eye = screen.getByTestId('icon-eye')
+      eye.addEventListener('click', handleClickIconEye(eye))
+      userEvent.click(eye)
+      expect(handleClickIconEye).toHaveBeenCalled()
+
+      expect(document.body.classList.contains('modal-open')).toBeTruthy()
     })
   })
 })
