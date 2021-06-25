@@ -26,94 +26,82 @@
 
 **When** je remplis le champ e-mail du login employé au bon format (sous la forme string@string.string), le champ password du login employé et je clique sur le bouton Se connecter
 
-**Then** Je suis redirigé vers la page Dashboard
+**Then** Je suis redirigé vers la page Bills
 
 ## Scénario 4
 
 **Given** Je suis connecté en tant qu'employé
 
-**When** Je suis sur le dashboard
+**When** Je suis sur la page Bills
 
-**Then** Je vois la liste de toutes les notes de frais que j'ai envoyées
+**Then** Je vois la liste de toutes les notes de frais que j'ai envoyées, triées de la plus récente à la plus ancienne
 
 ## Scénario 5
 
-**Given** Je suis connecté en tant qu’employé sur la page Dashboard
+**Given** Je suis connecté en tant qu’employé sur la page Bills
 
-**When** je clique sur le bouton Nouvelle note de frais
+**When** Je clique sur le bouton Nouvelle note de frais
 
-**Then** Le formulaire de création d’une nouvelle note de frais est affiché avec l’ensemble des champs vides
+**Then** Je suis redirigé sur la page NewBill
+
+**And** Le formulaire de création d’une nouvelle note de frais est affiché avec l’ensemble des champs vides
 
 ## Scénario 6
 
-**Given** Je suis connecté en tant qu’employé
+**Given** Je suis connecté en tant qu’employé sur la page NewBill
 
-**When** Je ne remplis pas le champ date du formulaire de création d’une nouvelle note de frais et je clique sur le bouton Envoyer
+**When** Je ne remplis pas les champs obligatoires (date, montant TTC, TVA, justificatif) du formulaire de création d’une nouvelle note de frais et je clique sur le bouton Envoyer
 
 **Then** Je reste sur le formulaire de création d’une nouvelle note de frais
 
-**And** Je suis invité à remplir le champ date
+**And** Je suis invité à remplir les champs manquants
 
 ## Scénario 7
 
-**Given** Je suis connecté en tant qu’employé
+**Given** Je suis connecté en tant qu’employé sur la page NewBill
 
-**When** Je remplis le champ Date mais pas le champ Montant TTC du formulaire de création d’une nouvelle note de frais et je clique sur le bouton Envoyer
+**When** Je clique sur le bouton Parcourir du champ justificatif
 
-**Then** Je reste sur le formulaire de création d’une nouvelle note de frais
-
-**And** Je suis invité à remplir le champ Montant TTC
+**Then** Je ne peux ajouter qu'un fichier au format jpg, jpeg ou png
 
 ## Scénario 8
 
-**Given** Je suis connecté en tant qu’employé
+**Given** Je suis connecté en tant qu’employé sur la page NewBill
 
-**When** Je remplis le champ Date et le champ Montant TTC mais pas le champ TVA du formulaire de création d’une nouvelle note de frais et je clique sur le bouton Envoyer
+**When** Je remplis les champs obligatoires (date, montant TTC, TVA, justificatif) du formulaire de création d’une nouvelle note de frais et je clique sur le bouton Envoyer
 
-**Then** Je reste sur le formulaire de création d’une nouvelle note de frais
+**Then** Je suis redirigé sur la page Bills
 
-**And** Je suis invité à remplir le champ TVA
+**And** La note de frais que je viens d'envoyer apparaît en tête de la liste de mes notes de frais avec le statut "En attente"
 
 ## Scénario 9
 
-**Given** Je suis connecté en tant qu’employé
-
-**When** Je remplis le champ Date, le champ Montant TTC et le champ TVA mais je n’ajoute pas de justificatif dans le formulaire de création d’une nouvelle note de frais et je clique sur le bouton Envoyer
-
-**Then** Je reste sur le formulaire de création d’une nouvelle note de frais
-
-**And** Je suis invité à ajouter un justificatif
-
-## Scénario 10
-
-**Given** Je suis connecté en tant qu’employé
-
-**When** Je remplis le champ Date, le champ Montant TTC, le champ TVA et j’ajoute un justificatif dans le formulaire de création d’une nouvelle note de frais et je clique sur le bouton Envoyer
-
-**Then** Je suis redirigé vers la page Dashboard
-
-**And** Je vois la note de frais que je viens de créer avec le statut “En attente”
-
-## Scénario 11
-
-**Given** Je suis connecté en tant qu'employé et je suis sur la page Dashboard
+**Given** Je suis connecté en tant qu'employé et je suis sur la page Bills
 
 **When** Je clique sur le bouton pour visualiser une note de frais
 
-**Then** Une modale apparaît avec le PDF du justificatif
+**Then** Une boîte modale s'ouvre et affiche le justificatif de la note de frais
 
-## Scénario 12
+## Scénario 10
 
-**Given** Je suis connecté en tant qu'employé et je suis sur la page Dashboard
+**Given** Je suis connecté en tant qu'employé sur la page Bills et j'ai cliqué sur le bouton pour visualiser une note de frais
+
+**When** Je clique sur le bouton quitter de la boîte modale
+
+**Then** La boîte modale de ferme
+
+## Scénario 11
+
+**Given** Je suis connecté en tant qu'employé et je suis sur la page Bills
 
 **When** Je clique sur le bouton Se déconnecter de la barre verticale
 
 **Then** Je suis envoyé à la page Login
 
-## Scénario 13
+## Scénario 12
 
-**Given** Je suis connecté en tant qu'employé et je suis sur la page Dashboard
+**Given** Je suis connecté en tant qu'employé et je suis sur la page Bills
 
 **When** Je clique sur le bouton Retour en arrière de la navigation
 
-**Then** Je reste sur la page Dashboard
+**Then** Je reste sur la page Bills
