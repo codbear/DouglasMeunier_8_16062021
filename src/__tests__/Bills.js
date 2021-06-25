@@ -5,6 +5,7 @@ import { bills } from "../fixtures/bills.js"
 import { ROUTES } from '../constants/routes';
 import BillsUI from "../views/BillsUI.js"
 import Bills from '../containers/Bills';
+import firebase from '../__mocks__/firebase';
 
 const onNavigate = (pathname) => {
   document.body.innerHTML = ROUTES({ pathname })
@@ -77,6 +78,53 @@ describe("Given I am connected as an employee", () => {
         expect(handleClickNewBill).toHaveBeenCalled()
         expect(screen.getByText('Envoyer une note de frais')).toBeTruthy()
       })
+    })
+  })
+
+  // test d'intégration GET
+  describe("When I navigate to Bills", () => {
+    const getRequest = jest
+      .fn(firebase.get)
+      .mockImplementationOnce(firebase.get)
+      .mockImplementationOnce(() => Promise.reject(new Error('Erreur 404')))
+      .mockImplementationOnce(() => Promise.reject(new Error('Erreur 500')))
+
+    test("fetches bills from mock API GET", async () => {
+      const bills = await getRequest()
+      const { data } = bills
+
+      expect(getRequest).toHaveBeenCalledTimes(1)
+      expect(data.length).toBe(4)
+    })
+
+    test("fetches bills from an API and fails with 404 message error", async () => {
+      let response
+
+      try {
+        response = await getRequest()
+      } catch (e) {
+        response = {error: e}
+      }
+
+      document.body.innerHTML = BillsUI(response)
+
+      expect(getRequest).toHaveBeenCalledTimes(2)
+      expect(screen.getByText(/Erreur 404/)).toBeTruthy()
+    })
+
+    test("fetches bills from an API and fails with 500 message error", async () => {
+      let response
+
+      try {
+        response = await getRequest()
+      } catch (e) {
+        response = {error: e}
+      }
+
+      document.body.innerHTML = BillsUI(response)
+
+      expect(getRequest).toHaveBeenCalledTimes(3)
+      expect(screen.getByText(/Erreur 500/)).toBeTruthy()
     })
   })
 })
