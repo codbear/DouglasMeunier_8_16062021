@@ -1,9 +1,11 @@
 import { fireEvent, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import { localStorageMock } from '../__mocks__/localStorage';
+import firebase from '../__mocks__/firebase';
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
 import { ROUTES } from '../constants/routes';
+import BillsUI from '../views/BillsUI';
 
 const onNavigate = (pathname) => {
   document.body.innerHTML = ROUTES({ pathname })
@@ -90,6 +92,54 @@ describe("Given I am connected as an employee", () => {
         expect(handleChangeFile).toHaveBeenCalled()
         expect(fileInput.files[0].name).toBe(file.name)
       })
+    })
+  })
+
+  // test d'intégration POST
+  describe("When I create a new bill", () => {
+    const postRequest = jest
+      .fn(firebase.post)
+      .mockImplementationOnce(firebase.post)
+      .mockImplementationOnce(() => Promise.reject(new Error('Erreur 404')))
+      .mockImplementationOnce(() => Promise.reject(new Error('Erreur 500')))
+
+    test("posts bill with mock API POST", async () => {
+      const bills = await postRequest(newBill)
+      const { data } = bills
+
+      expect(postRequest).toHaveBeenCalledTimes(1)
+      expect(data.length).toBe(5)
+      expect(data.pop().id).toBe(newBill.id)
+    })
+
+    test("posts bill with mock API POST but fail with 404 error message", async () => {
+      let response
+
+      try {
+        response = await postRequest(newBill)
+      } catch (e) {
+        response = {error: e}
+      }
+
+      document.body.innerHTML = BillsUI(response)
+
+      expect(postRequest).toHaveBeenCalledTimes(2)
+      expect(screen.getByText(/Erreur 404/)).toBeTruthy()
+    })
+
+    test("posts bill with mock API POST but fail with 500 error message", async () => {
+      let response
+
+      try {
+        response = await postRequest(newBill)
+      } catch (e) {
+        response = {error: e}
+      }
+
+      document.body.innerHTML = BillsUI(response)
+
+      expect(postRequest).toHaveBeenCalledTimes(3)
+      expect(screen.getByText(/Erreur 500/)).toBeTruthy()
     })
   })
 })
