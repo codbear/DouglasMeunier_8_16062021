@@ -1,11 +1,28 @@
 import { fireEvent, screen } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
+import { localStorageMock } from '../__mocks__/localStorage';
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
-import { localStorageMock } from '../__mocks__/localStorage';
 import { ROUTES } from '../constants/routes';
 
 const onNavigate = (pathname) => {
   document.body.innerHTML = ROUTES({ pathname })
+}
+
+const newBill = {
+  'id': 'qcCK3SzECmaZAGRrHja7',
+  'status': 'pending',
+  'pct': 20,
+  'amount': 200,
+  'email': 'a@a',
+  'name': 'testPOST',
+  'vat': '40',
+  'fileName': 'preview-facture-free-201801-pdf-1.jpg',
+  'date': '2002-02-02',
+  'commentAdmin': '',
+  'commentary': 'test2',
+  'type': 'Restaurants et bars',
+  'fileUrl': 'https://firebasestorage.googleapis.com/v0/b/billable-677b6.a…f-1.jpg?alt=media&token=4df6ed2c-12c8-42a2-b013-346c1346f732'
 }
 
 beforeEach(() => {
@@ -39,7 +56,7 @@ describe("Given I am connected as an employee", () => {
     })
 
     describe('When I upload a file', () => {
-      test("Then the file should be added to the form", () => {
+      test("Then the file should be added to the form", async (done) => {
         const snapshot = {
           ref: {
             getDownloadURL: () => 'https://url.test'
@@ -48,23 +65,30 @@ describe("Given I am connected as an employee", () => {
 
         class Storage {
           ref() { return this }
-          put() { return new Promise((resolve) => resolve(snapshot)) }
+          async put() { return snapshot }
         }
 
         const newBillContainer = new NewBill({
           document, onNavigate, firestore: {storage: new Storage()}, localStorage: window.localStorage
         })
 
-        const handleChangeFile = jest.fn(newBillContainer.handleChangeFile)
-        const file = new File(['test'], 'test.png', { type: 'image/png' })
-        const fileInput = screen.getByTestId('file')
-        fileInput.addEventListener('change', handleChangeFile)
-        fireEvent.change(fileInput, {
-          target: { files: [file] }
+        const file = new File(['file'], 'file.png', { type: 'image/png' })
+
+        const handleChangeFile = jest.fn(async (e) => {
+          await newBillContainer.handleChangeFile(e)
+
+          expect(newBillContainer.fileUrl).toBe(snapshot.ref.getDownloadURL())
+          expect(newBillContainer.fileName).toBe(file.name)
+          done()
         })
 
+        const fileInput = screen.getByTestId('file')
+        fileInput.addEventListener('change', handleChangeFile)
+
+        userEvent.upload(fileInput, file)
+
         expect(handleChangeFile).toHaveBeenCalled()
-        expect(fileInput.files[0].name).toBe('test.png')
+        expect(fileInput.files[0].name).toBe(file.name)
       })
     })
   })
